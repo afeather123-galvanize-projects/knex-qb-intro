@@ -9,17 +9,19 @@ const port = process.env.PORT || 8000;
 app.use(bodyParser.json());
 
 app.get('/students', function(req, res) {
-  knex.raw("SELECT * FROM students").then((result) => {
-    res.json(result.rows)
+  knex('students').then((result) => {
+    res.json(result)
   })
   .catch((err) => {
     console.error(err)
+    res.sendDate(500)
   });
 });
 
 app.get('/students/:id', (req, res) => {
-  knex.raw("SELECT * FROM students WHERE students.id = " + req.params.id).then(result => {
-    res.json(result.rows)
+  knex('students').where('id', req.params.id)
+  .then(result => {
+    res.json(result)
   }).catch(err => {
     console.log(err); 
     res.sendStatus(404)
@@ -28,7 +30,8 @@ app.get('/students/:id', (req, res) => {
 
 app.post('/students', (req, res) => {
   if(req.body.name && req.body.age) {
-    knex.raw("INSERT INTO students (name, age) VALUES ('" + req.body.name + "', " + req.body.age + ")").then(() => {
+    knex('students').insert(req.body)
+    .then(() => {
       res.sendStatus(200);
     }).catch((err) => {
       console.log(err);
@@ -41,7 +44,7 @@ app.post('/students', (req, res) => {
 
 app.put('/students/:id', (req, res) => {
   if(req.body.name && req.body.age) {
-    knex.raw("UPDATE students SET name = '" + req.body.name + "', age = " + req.body.age + " WHERE id = " + req.params.id)
+    knex('students').update(req.body).where('id', req.params.id)
     .then(() => {
       res.sendStatus(200);
     })
@@ -53,7 +56,7 @@ app.put('/students/:id', (req, res) => {
 });
 
 app.delete('/students/:id', (req, res) => {
-  knex.raw("DELETE FROM students WHERE students.id = " + req.params.id)
+  knex('students').delete().where('id', req.params.id)
   .then(() => {
     res.sendStatus(200);
   })
